@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { connectDB, sql } = require('../config');
-const { checkRole } = require('../middleware/auth');
+const { auth, checkRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // الحصول على جميع الشركات
-router.get('/', checkRole(['admin', 'company_admin']), async (req, res) => {
+router.get('/', auth, checkRole(['admin', 'company_admin']), async (req, res) => {
     let pool;
     try {
         pool = await connectDB();
@@ -19,7 +19,7 @@ router.get('/', checkRole(['admin', 'company_admin']), async (req, res) => {
 });
 
 // إضافة شركة جديدة
-router.post('/', checkRole(['admin']), async (req, res) => {
+router.post('/', auth, checkRole(['admin']), async (req, res) => {
     let pool;
     try {
         const { name, contract_type, contract_start, contract_end, amount } = req.body;

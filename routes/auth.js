@@ -1,10 +1,9 @@
-// Example of how to implement validation in routes/auth.js
-
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validator');
-const { checkRole } = require('../middleware/auth');
+const { auth, checkRole } = require('../middleware/auth');
+const authController = require('../controllers/auth');
 
 // Validation rules for the login endpoint
 const loginValidation = [
@@ -37,12 +36,12 @@ const updateSettingsValidation = [
 ];
 
 // Register route with validation
-router.post('/register', validate(registerValidation), authController.register);
+router.post('/register', auth, checkRole(['admin']), validate(registerValidation), authController.register);
 
 // Login route with validation
 router.post('/login', validate(loginValidation), authController.login);
 
 // Update settings route with validation and authentication
-router.put('/settings', checkRole(['user', 'admin']), validate(updateSettingsValidation), authController.updateSettings);
+router.put('/settings', auth, validate(updateSettingsValidation), authController.updateSettings);
 
 module.exports = router;
