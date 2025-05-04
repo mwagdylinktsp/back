@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice History</title>
+    
+    <!-- Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+</head>
+
+<body class="bg-black">
+    <div class="container mx-auto px-4 py-8">
+        <!-- زر العودة -->
+        <div class="flex justify-between items-center mb-8">
+            <!-- Replace the heading text with an image -->
+            <div class="h-[100px] w-[250px] relative mb-6">
+                <img src="data/norWeenlogo.png" alt="norWeen Invoice Logo"
+                    class="object-contain w-full h-full absolute">
+            </div>        
+            <!-- Button aligned to the right -->
+            <button onclick="window.location.href='index.html'"
+                class="text-white px-6 py-3 rounded-lg"
+                style="background-color: #ff3c00; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#cc3200';"
+                onmouseout="this.style.backgroundColor='#ff3c00';">
+                Back to Home
+                <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- قائمة الفواتير -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-bold mb-4">Invoice History</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-2 text-right">Invioce Number</th>
+                            <th class="p-2 text-right">Date</th>
+                            <th class="p-2 text-right">Client</th>
+                            <th class="p-2 text-right">Total</th>
+                            <th class="p-2 text-right">Payment Status</th>
+                            <th class="p-2 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="./src/firebase.js"></script>
+    <script type="module" src="./src/services/firebaseService.js"></script>
+    <script type="module" src="./invoices-history.js"></script>
+</body>
+
+</html>

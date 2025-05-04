@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | norWeen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Tailwind & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" href="data/norWeenicon.png" type="image/png">
+</head>
+
+<body class="bg-black min-h-screen flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-md text-center">
+    <img src="data/norWeenlogoBlack.png" alt="Logo" class="w-64 mx-auto mb-4">
+    <h1 class="text-2xl font-bold mb-6">Login</h1>
+
+    <input type="email" id="email" placeholder="Email Address"
+      class="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+
+    <input type="password" id="password" placeholder="Password"
+      class="w-full border border-gray-300 rounded p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500" />
+
+    <button onclick="login()"
+      class="w-full bg-[#ff3c00] text-white py-3 rounded hover:bg-[#cc3200] transition-all">
+      Sign In
+    </button>
+
+    <div class="text-red-600 mt-4 text-sm" id="error"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD1_MuUCT4U3YaI0-yRGaKO0sVnXFGfxCU",
+      authDomain: "norween-invoices.firebaseapp.com",
+      projectId: "norween-invoices",
+      storageBucket: "norween-invoices.appspot.com",
+      messagingSenderId: "1001073857267",
+      appId: "1:1001073857267:web:a0d632f13f6316baac1d86"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.login = function () {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('error');
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => userCredential.user.getIdToken())
+        .then((idToken) => {
+          localStorage.setItem("idToken", idToken);
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          console.error("Login error:", error);
+          errorEl.textContent = error.message;
+        });
+    };
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === "Enter" && (document.activeElement.id === "email" || document.activeElement.id === "password")) {
+        login();
+      }
+    });
+  </script>
+</body>
+</html>

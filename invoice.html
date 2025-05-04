@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+</head>
+
+<body class="bg-black">
+    <div class="container mx-auto p-8">
+        <div id="invoice-content" class="bg-white rounded-lg shadow p-8 mb-8">
+            <!-- رأس الفاتورة -->
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <img id="companyLogo" class="max-h-28 mb-6">
+                    <h1 id="companyName" class="text-2xl font-bold"></h1>
+                    <p id="companyAddress" class="text-gray-600"></p>
+                    <p id="companyPhone" class="text-gray-600"></p>
+                    <p id="companyEmail" class="text-gray-600"></p>
+                </div>
+                <div class="text-left">
+                    <h2 class="text-xl font-bold mb-2">Invoice Number: <span id="invoiceNumber"></span></h2>
+                    <p class="text-gray-600">Date: <span id="invoiceDate"></span></p>
+                    <div class="text-gray-600 flex items-center mb-2">
+                        <span>Payment Status:</span>
+                        <select id="paymentStatus" class="mr-2 border rounded p-1"
+                            onchange="handlePaymentStatusChange()">
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Partially Paid ">Partially Paid</option>
+                        </select>
+                    </div>
+                    <div id="partialPaymentContainer" class="text-gray-600 flex items-center hidden">
+                        <span>Paid Amount:</span>
+                        <input type="number" id="paidAmount" class="mr-2 border rounded p-1 w-32" min="0" step="0.01">
+                        <span>EGP</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بيانات العميل -->
+            <div class="mb-8">
+                <h3 class="text-lg font-bold mb-2">Client Information</h3>
+                <p>Client Name: <span id="customerName"></span></p>
+                <p>Email Address: <span id="customerEmail"></span></p>
+                <p>Phone Number: <span id="customerPhone"></span></p>
+            </div>
+
+            <!-- تفاصيل الفاتورة -->
+            <div class="mb-8">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-2 text-right">Product</th>
+                            <th class="p-2 text-right">Quantity</th>
+                            <th class="p-2 text-right">Price</th>
+                            <th class="p-2 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceItems"></tbody>
+                </table>
+            </div>
+
+            <!-- إجمالي الفاتورة -->
+            <div class="text-left mb-8">
+                <p class="text-xl font-bold mb-2">Total: <span id="totalAmount"></span>EGP </p>
+                <div id="remainingAmountContainer" class="hidden">
+                    <p class="text-lg text-gray-600">Paid Amount: <span id="displayPaidAmount"></span>EGP </p>
+                    <p class="text-lg text-red-600">Remaining Amount: <span id="remainingAmount"></span>EGP </p>
+                </div>
+            </div>
+
+            <!-- الملاحظات -->
+            <div class="mb-8" id="notesSection">
+                <h3 class="text-lg font-bold mb-2">Notes</h3>
+                <textarea id="invoiceNotes" class="w-full border rounded p-2"></textarea>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div class="flex justify-end mt-8 no-print">
+                <button onclick="handleClose()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    Close
+                </button>
+                <button onclick="downloadPDF()"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-4">
+                    Donwload PDF
+                </button>
+                <button onclick="window.print()" class="text-white px-4 py-2 rounded mr-4"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    Print
+                </button>
+                <button onclick="saveChanges()" id="saveChangesBtn"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-4">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const invoice = JSON.parse(localStorage.getItem('currentInvoice'));
+            if (!invoice) {
+                alert('Invoice Data not found. Please try again.');
+                return;
+            }
+            console.log(invoice);
+            // تحميل بيانات الفاتورة
+            document.getElementById('invoiceNumber').textContent = invoice.invoiceNumber;
+
+            // تنسيق التاريخ
+            const date = new Date(invoice.date);
+            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+            document.getElementById('invoiceDate').textContent = formattedDate;
+            document.getElementById('paymentStatus').value = invoice.paymentStatus || 'Unpaid';
+            document.getElementById('customerName').textContent = invoice.customer.name;
+            document.getElementById('customerEmail').textContent = invoice.customer.email;
+            document.getElementById('customerPhone').textContent = invoice.customer.phone;
+            document.getElementById('invoiceNotes').value = invoice.notes || '';
+
+            // إعداد حقل المبلغ المدفوع
+            if (invoice.paymentStatus === 'Partially Paid') {
+                document.getElementById('partialPaymentContainer').classList.remove('hidden');
+                document.getElementById('paidAmount').value = invoice.paidAmount || 0;
+            }
+
+            // عرض المنتجات
+            const tbody = document.getElementById('invoiceItems');
+            invoice.items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="border p-2">${item.name}</td>
+                    <td class="border p-2">${item.quantity}</td>
+                    <td class="border p-2">${item.price}</td>
+                    <td class="border p-2">${item.total}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // عرض الإجمالي
+            const total = invoice.total;
+            document.getElementById('totalAmount').textContent = total;
+
+            // إعداد حقل المبلغ المدفوع وعرض المبلغ المتبقي
+            if (invoice.paymentStatus === 'Partially Paid') {
+                const paidAmount = invoice.paidAmount || 0;
+                const remainingAmount = total - paidAmount;
+
+                document.getElementById('partialPaymentContainer').classList.remove('hidden');
+                document.getElementById('paidAmount').value = paidAmount;
+
+                // عرض تفاصيل المبالغ
+                document.getElementById('remainingAmountContainer').classList.remove('hidden');
+                document.getElementById('displayPaidAmount').textContent = paidAmount;
+                document.getElementById('remainingAmount').textContent = remainingAmount;
+            }
+
+            // تحميل بيانات الشركة
+            fetch('/api/company')
+                .then(response => response.json())
+                .then(company => {
+                    document.getElementById('companyName').textContent = company.name;
+                    document.getElementById('companyAddress').textContent = company.address;
+                    document.getElementById('companyPhone').textContent = company.phone;
+                    document.getElementById('companyEmail').textContent = company.email;
+                    if (company.logo) {
+                        document.getElementById('companyLogo').src = company.logo;
+                    }
+                });
+
+            // إظهار/إخفاء زر الحفظ
+            const isEditing = localStorage.getItem('editingInvoice') === 'true';
+            document.getElementById('saveChangesBtn').style.display = isEditing ? 'block' : 'none';
+        });
+
+        function saveChanges() {
+            const invoice = JSON.parse(localStorage.getItem('currentInvoice'));
+
+            // تحديث حالة السداد والملاحظات
+            const paymentStatus = document.getElementById('paymentStatus').value;
+            invoice.paymentStatus = paymentStatus;
+            invoice.notes = document.getElementById('invoiceNotes').value;
+
+            // حفظ المبلغ المدفوع إذا كان السداد جزئياً
+            if (paymentStatus === 'مسدد جزئياً') {
+                invoice.paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
+            } else {
+                delete invoice.paidAmount; // حذف المبلغ المدفوع إذا لم يكن السداد جزئياً
+            }
+
+            // حفظ التغييرات
+            fetch(`/api/invoices/${invoice.invoiceNumber}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(invoice)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Changes saved successfully');
+                        localStorage.removeItem('editingInvoice');
+                        window.location.href = 'invoices-history.html';
+                    } else {
+                        alert('Error saving changes');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving invoice:', error);
+                    alert('Error saving changes');
+                });
+        }
+
+        function handleClose() {
+            localStorage.removeItem('currentInvoice');
+            localStorage.removeItem('editingInvoice');
+            window.location.href = 'invoices-history.html';
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('invoice-content');
+            const opt = {
+                margin: 0.2,
+                filename: 'invoice.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'px', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        
+        // إخفاء الأزرار قبل التحويل
+        const buttons = document.querySelectorAll('.no-print');
+        buttons.forEach(button => button.style.display = 'none');
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            // إعادة إظهار الأزرار بعد التحويل
+            buttons.forEach(button => button.style.display = 'flex');
+        });
+        }
+
+        function handlePaymentStatusChange() {
+            const status = document.getElementById('paymentStatus').value;
+            const partialPaymentContainer = document.getElementById('partialPaymentContainer');
+            const remainingAmountContainer = document.getElementById('remainingAmountContainer');
+            const paidAmountInput = document.getElementById('paidAmount');
+
+            if (status === 'Partially Paid') {
+                partialPaymentContainer.classList.remove('hidden');
+                remainingAmountContainer.classList.remove('hidden');
+                // تعيين القيمة الافتراضية إذا كانت فارغة
+                if (!paidAmountInput.value) {
+                    paidAmountInput.value = '0';
+                }
+                updateRemainingAmount();
+            } else {
+                partialPaymentContainer.classList.add('hidden');
+                remainingAmountContainer.classList.add('hidden');
+                paidAmountInput.value = '';
+            }
+        }
+
+        function updateRemainingAmount() {
+            const total = parseFloat(document.getElementById('totalAmount').textContent);
+            const paidAmount = parseFloat(document.getElementById('paidAmount').value) || 0;
+            const remainingAmount = total - paidAmount;
+
+            document.getElementById('displayPaidAmount').textContent = paidAmount;
+            document.getElementById('remainingAmount').textContent = remainingAmount;
+        }
+
+        // إضافة مستمع لحدث تغيير قيمة المبلغ المدفوع
+        document.getElementById('paidAmount').addEventListener('input', updateRemainingAmount);
+    </script>
+</body>
+
+</html>

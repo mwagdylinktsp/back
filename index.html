@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>norWeen Invoice</title>
+
+    <!-- Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    </script>
+</head>
+
+<body class="bg-black">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative mb-6">
+                <img src="data/norWeenlogo.png" alt="norWeen Invoice Logo"
+                    class="object-contain w-full h-full absolute">
+            </div>
+            <!-- Button aligned to the right -->
+            <button onclick="window.location.href='invoices-history.html'" class="text-white px-6 py-3 rounded-lg"
+                style="background-color: #ff3c00; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#cc3200';" onmouseout="this.style.backgroundColor='#ff3c00';">
+                Invoices History
+                <i class="fas fa-history ml-2"></i>
+            </button>
+        </div>
+
+        <!-- بيانات الشركة -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Company Information</h2>
+            <form id="companyForm" class="space-y-4">
+                <div>
+                    <label class="block">Company Name</label>
+                    <input type="text" id="companyName" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Company Address</label>
+                    <input type="text" id="companyAddress" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Phone Number</label>
+                    <input type="tel" id="companyPhone" style="direction: ltr;" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Email Address</label>
+                    <input type="email" id="companyEmail" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Company Logo</label>
+                    <input type="file" id="companyLogo" accept="image/*" class="w-full border rounded p-2"
+                        onchange="previewLogo()" />
+                    <img id="logoPreview" src="data/norWeenlogoBlack.png" class="hidden mt-2 max-w-xs rounded shadow">
+                </div>
+                <!-- <div>
+                    <label class="block">Company Logo</label>
+                    <input type="file" id="companyLogo" accept="image/*" class="w-full border rounded p-2">
+                    <img id="logoPreview" class="hidden mt-2 max-w-xs">
+                </div> -->
+                <!-- <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+                    حفظ بيانات الشركة
+                </button> -->
+                <button type="submit" class="text-white px-4 py-2 rounded"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    Save Company Data
+                </button>
+            </form>
+        </div>
+
+        <!-- إدارة العملاء -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Client Management</h2>
+            <form id="customerForm" class="space-y-4 mb-8">
+                <div>
+                    <label class="block">Client Name</label>
+                    <input type="text" id="customerName" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Email Address</label>
+                    <input type="email" id="customerEmail" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Phone Number</label>
+                    <input type="tel" id="customerPhone" style="direction: ltr;" class="w-full border rounded p-2">
+                </div>
+                <button type="submit" class="text-white px-4 py-2 rounded"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    Add Client
+                </button>
+            </form>
+            <div id="customersList" class="space-y-4"></div>
+        </div>
+
+        <!-- إدارة المنتجات -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Product Management</h2>
+            <form id="productForm" class="space-y-4 mb-8">
+                <div>
+                    <label class="block">Prouct Name</label>
+                    <input type="text" id="productName" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Product Code</label>
+                    <input type="text" id="productCode" class="w-full border rounded p-2">
+                </div>
+                <div>
+                    <label class="block">Product Price</label>
+                    <input type="number" id="productPrice" step="0.01" class="w-full border rounded p-2">
+                </div>
+                <button type="submit" class="text-white px-4 py-2 rounded"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    Add Product
+                </button>
+            </form>
+            <div id="productsList" class="space-y-4"></div>
+        </div>
+
+        <!-- إنشاء فاتورة -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-bold mb-4">Create Invoice</h2>
+            <form id="invoiceForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block">Invoice Number</label>
+                        <input type="text" id="invoiceNumber" class="w-full border rounded p-2">
+                    </div>
+                    <div>
+                        <label class="block">Invoice Date</label>
+                        <input type="date" id="invoiceDate" class="w-full border rounded p-2">
+                    </div>
+                    <div>
+                        <label class="block">Client</label>
+                        <select id="invoiceCustomer" class="w-full border rounded p-2"></select>
+                    </div>
+                    <div>
+                        <label class="block">Payment Status</label>
+                        <select id="paymentStatus" class="w-full border rounded p-2">
+                            <option value="Paid">Paid</option>
+                            <option value="Unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="border rounded p-4 space-y-4">
+                    <h3 class="font-bold">Invoice Items</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block">Pruoduct</label>
+                            <select id="invoiceProduct" class="w-full border rounded p-2"></select>
+                        </div>
+                        <div>
+                            <label class="block">Quantity</label>
+                            <input type="number" id="invoiceQuantity" value="1" min="1"
+                                class="w-full border rounded p-2">
+                        </div>
+                        <div>
+                            <label class="block">Discount (%)</label>
+                            <input type="number" id="invoiceDiscount" value="0" min="0" max="100"
+                                class="w-full border rounded p-2">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="addInvoiceItem()" class="text-white px-4 py-2 rounded"
+                                style="background-color: #ff3c00; transition: background-color 0.2s;"
+                                onmouseover="this.style.backgroundColor='#cc3200';"
+                                onmouseout="this.style.backgroundColor='#ff3c00';">
+                                Add Items
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="p-2 text-right">Product</th>
+                                <th class="p-2 text-right">Code</th>
+                                <th class="p-2 text-right">Price</th>
+                                <th class="p-2 text-right">Quantity</th>
+                                <th class="p-2 text-right">Discount</th>
+                                <th class="p-2 text-right">Total</th>
+                                <th class="p-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceItems"></tbody>
+                    </table>
+                </div>
+
+                <div class="text-left">
+                    <p class="text-xl font-bold">Total: <span id="invoiceTotal">0.00</span>EGP </p>
+                </div>
+
+                <div>
+                    <label class="block">Notes</label>
+                    <textarea id="invoiceNotes" rows="3" class="w-full border rounded p-2"></textarea>
+                </div>
+
+                <button type="submit" class="text-white px-6 py-2 rounded"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    Create & Print Invoice
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        const handleLogin = () => {
+            const token = localStorage.getItem("idToken");
+            if (!token) {
+                window.location.href = "login.html";
+            }
+        }
+        handleLogin();
+    </script>
+    <script type="module" src="src/firebase.js"></script>
+    <script type="module" src="src/services/firebaseService.js"></script>
+    <script type="module" src="script.js"></script>
+    <script>
+        function previewLogo() {
+            const input = document.getElementById('companyLogo');
+            const preview = document.getElementById('logoPreview');
+            const file = input.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove("hidden");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

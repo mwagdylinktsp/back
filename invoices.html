@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old Invoices</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+</head>
+<body class="bg-black">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 max-w-6xl mx-auto">
+            <!-- رأس الصفحة -->
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-600">Old Invoices</h1>
+                <a href="index.html" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-arrow-right ml-2"></i>Back
+                </a>
+            </div>
+
+            <!-- أدوات البحث والتصفية -->
+            <div class="mb-6 flex flex-wrap gap-4">
+                <div class="flex-1">
+                    <input type="text" id="searchInput" placeholder="Searching in Invoice ..." 
+                           class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="filterByDate('today')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">Today</button>
+                    <button onclick="filterByDate('week')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">This Week</button>
+                    <button onclick="filterByDate('month')" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">This Month</button>
+                </div>
+            </div>
+
+            <!-- جدول الفواتير -->
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="py-3 px-4 text-right">Invoice Number</th>
+                            <th class="py-3 px-4 text-right">Date</th>
+                            <th class="py-3 px-4 text-right">Client Name</th>
+                            <th class="py-3 px-4 text-right">Itema</th>
+                            <th class="py-3 px-4 text-right">Total</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTableBody">
+                        <!-- سيتم إضافة الفواتير هنا -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- رسالة عند عدم وجود فواتير -->
+            <div id="noInvoicesMessage" class="hidden text-center py-8 text-gray-500">
+                No Invoices Found
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // دالة لتحميل الفواتير من التخزين المحلي
+        function loadInvoices() {
+            const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const tableBody = document.getElementById('invoicesTableBody');
+            const noInvoicesMessage = document.getElementById('noInvoicesMessage');
+
+            if (savedInvoices.length === 0) {
+                tableBody.innerHTML = '';
+                noInvoicesMessage.classList.remove('hidden');
+                return;
+            }
+
+            noInvoicesMessage.classList.add('hidden');
+            tableBody.innerHTML = savedInvoices.map(invoice => `
+                <tr class="border-t hover:bg-gray-50">
+                    <td class="py-3 px-4">${invoice.invoiceNumber}</td>
+                    <td class="py-3 px-4">${invoice.date}</td>
+                    <td class="py-3 px-4">${invoice.customer.name}</td>
+                    <td class="py-3 px-4">${invoice.items.length}</td>
+                    <td class="py-3 px-4">${invoice.total} EGP</td>
+                    <td class="py-3 px-4">
+                        <div class="flex gap-2">
+                            <button onclick="viewInvoice('${invoice.invoiceNumber}')" 
+                                    class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="printInvoice('${invoice.invoiceNumber}')"
+                                    class="text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button onclick="deleteInvoice('${invoice.invoiceNumber}')"
+                                    class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // دالة لعرض الفاتورة
+        function viewInvoice(invoiceNumber) {
+            const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const invoice = savedInvoices.find(inv => inv.invoiceNumber === invoiceNumber);
+            if (invoice) {
+                localStorage.setItem('currentInvoice', JSON.stringify(invoice));
+                window.open('invoice.html', '_blank');
+            }
+        }
+
+        // دالة لطباعة الفاتورة
+        function printInvoice(invoiceNumber) {
+            viewInvoice(invoiceNumber);
+        }
+
+        // دالة لحذف الفاتورة
+        function deleteInvoice(invoiceNumber) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this !',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+                    const updatedInvoices = savedInvoices.filter(inv => inv.invoiceNumber !== invoiceNumber);
+                    localStorage.setItem('invoices', JSON.stringify(updatedInvoices));
+                    loadInvoices();
+                    Swal.fire('Deleted!', 'The invoice has been deleted.', 'success');
+                }
+            });
+        }
+
+        // دالة للبحث في الفواتير
+        function searchInvoices(query) {
+            const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const filteredInvoices = savedInvoices.filter(invoice => 
+                invoice.invoiceNumber.toLowerCase().includes(query.toLowerCase()) ||
+                invoice.customer.name.toLowerCase().includes(query.toLowerCase()) ||
+                invoice.date.includes(query)
+            );
+            displayFilteredInvoices(filteredInvoices);
+        }
+
+        // دالة لتصفية الفواتير حسب التاريخ
+        function filterByDate(period) {
+            const savedInvoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+            const today = new Date();
+            const filteredInvoices = savedInvoices.filter(invoice => {
+                const invoiceDate = new Date(invoice.date);
+                switch(period) {
+                    case 'today':
+                        return invoiceDate.toDateString() === today.toDateString();
+                    case 'week':
+                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return invoiceDate >= weekAgo;
+                    case 'month':
+                        return invoiceDate.getMonth() === today.getMonth() && 
+                               invoiceDate.getFullYear() === today.getFullYear();
+                    default:
+                        return true;
+                }
+            });
+            displayFilteredInvoices(filteredInvoices);
+        }
+
+        // دالة لعرض الفواتير المصفاة
+        function displayFilteredInvoices(invoices) {
+            const tableBody = document.getElementById('invoicesTableBody');
+            const noInvoicesMessage = document.getElementById('noInvoicesMessage');
+
+            if (invoices.length === 0) {
+                tableBody.innerHTML = '';
+                noInvoicesMessage.classList.remove('hidden');
+                return;
+            }
+
+            noInvoicesMessage.classList.add('hidden');
+            tableBody.innerHTML = invoices.map(invoice => `
+                <tr class="border-t hover:bg-gray-50">
+                    <td class="py-3 px-4">${invoice.invoiceNumber}</td>
+                    <td class="py-3 px-4">${invoice.date}</td>
+                    <td class="py-3 px-4">${invoice.customer.name}</td>
+                    <td class="py-3 px-4">${invoice.items.length}</td>
+                    <td class="py-3 px-4">${invoice.total} EGP</td>
+                    <td class="py-3 px-4">
+                        <div class="flex gap-2">
+                            <button onclick="viewInvoice('${invoice.invoiceNumber}')" 
+                                    class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="printInvoice('${invoice.invoiceNumber}')"
+                                    class="text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button onclick="deleteInvoice('${invoice.invoiceNumber}')"
+                                    class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // إضافة مستمع الأحداث للبحث
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchInvoices(e.target.value);
+        });
+
+        // تحميل الفواتير عند تحميل الصفحة
+        window.onload = loadInvoices;
+    </script>
+</body>
+</html>

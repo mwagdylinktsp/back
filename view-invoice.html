@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Show Invoice</title>
+    
+    <!-- TailwindCSS & Font Awesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+
+    <!-- PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body class="bg-black">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Invoice Content -->
+        <div id="invoice-content" class="bg-white rounded-lg shadow-lg p-8">
+
+            <!-- Header -->
+            <div class="flex justify-between items-start mb-8 border-b pb-6">
+                <div>
+                    <img id="companyLogo" src="data/norWeenlogoBlack.png" class="h-[100px] w-[250px] relative mb-4 hidden" />
+                    <h1 id="companyName" class="hidden"></h1>
+                    <p id="companyAddress" class="text-sm text-gray-600 font-medium"></p>
+                    <p id="companyPhone" class="text-sm text-gray-600 font-medium"></p>
+                    <p id="companyEmail" class="text-sm text-gray-600 font-medium"></p>
+                </div>
+                <div class="text-left">
+                    <h2 class="text-3xl font-bold mb-2">Invoice</h2>
+                    <p id="invoiceNumber" class="text-sm text-gray-600 font-medium"></p>
+                    <p id="invoiceDate" class="text-sm text-gray-600 font-medium"></p>
+                </div>
+            </div>
+
+            <!-- Client Information -->
+            <div class="mb-8 border-b pb-6">
+                <h3 class="text-xl font-bold mb-4">Client Information</h3>
+                <p id="customerName" class="text-gray-800 mb-1 font-medium"></p>
+                <p id="customerEmail" class="text-gray-800 mb-1 font-medium"></p>
+                <p id="customerPhone" class="text-gray-800 mb-1 font-medium"></p>
+            </div>
+
+            <!-- Invoice Items -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold mb-4">Invoice Details</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 border-b">
+                                <th class="p-3 text-right">Product</th>
+                                <th class="p-3 text-right">Code</th>
+                                <th class="p-3 text-right">Price</th>
+                                <th class="p-3 text-right">Quantity</th>
+                                <th class="p-3 text-right">Discount</th>
+                                <th class="p-3 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceItems"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Totals -->
+            <div class="text-left mb-8 border-t pt-4 space-y-2">
+                <p class="text-xl font-semibold">Total: <span id="invoiceTotal"></span> EGP</p>
+                <div id="paymentDetails" class="hidden">
+                    <p class="text-green-600">Paid Amount: <span id="paidAmount"></span> EGP</p>
+                    <p class="text-red-600 font-bold">Remaining Amount: <span id="remainingAmount"></span> EGP</p>
+                </div>
+                <p id="paymentStatus" class="mt-2 font-bold"></p>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-8" id="notesSection">
+                <h3 class="text-xl font-bold mb-2">Notes</h3>
+                <p id="invoiceNotes" class="text-sm text-gray-600"></p>
+            </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="flex justify-between items-center mt-6 print:hidden">
+            <div class="space-x-4 space-x-reverse">
+                <button onclick="window.print()" class="text-white px-6 py-2 rounded"
+                    style="background-color: #ff3c00;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    <i class="fas fa-print ml-2"></i> Print
+                </button>
+                <button onclick="downloadPDF()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                    <i class="fas fa-file-pdf ml-2"></i> Download PDF
+                </button>
+            </div>
+            <button onclick="window.close()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                <i class="fas fa-times ml-2"></i> Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="src/firebase.js"></script>
+    <script type="module" src="src/services/firebaseService.js"></script>
+    <script type="module" src="view-invoice.js"></script>
+    <script>
+        function downloadPDF() {
+            const invoiceContent = document.getElementById('invoice-content');
+            html2pdf().from(invoiceContent).save('invoice.pdf');
+        }
+
+        // Check logo
+        const logo = document.getElementById("companyLogo");
+        fetch(logo.src)
+            .then(response => {
+                if (response.ok) logo.classList.remove("hidden");
+            })
+            .catch(error => console.warn("Logo not found:", error));
+    </script>
+</body>
+</html>
