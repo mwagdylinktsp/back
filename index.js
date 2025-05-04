@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -15,6 +14,7 @@ const companyRoutes = require('./routes/companies');
 const visitRoutes = require('./routes/visits');
 const ticketRoutes = require('./routes/tickets');
 const dashboardRoutes = require('./routes/dashboard');
+const docsRoutes = require('./routes/docs'); // Make sure to create this file or import properly
 
 const app = express();
 
@@ -35,7 +35,7 @@ app.use(helmet({
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             imgSrc: ["'self'", "data:", "blob:"],
-            connectSrc: ["'self'", "http://localhost:3015", "http://localhost:5000"]
+            connectSrc: ["'self'", process.env.FRONTEND_URL, `http://localhost:${process.env.PORT}`]
         }
     }
 }));
@@ -53,12 +53,20 @@ app.use((req, res, next) => {
     next();
 });
 
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/visits', visitRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/docs', docsRoutes);
 
+// Basic route for testing
+app.get('/', (req, res) => {
+    res.json({ message: 'Norween API Server is running' });
+});
+
+// 404 handler
 app.use((req, res) => {
     logger.warn(`Route not found: ${req.method} ${req.url}`);
     res.status(404).json({
@@ -67,6 +75,7 @@ app.use((req, res) => {
     });
 });
 
+// Error handler
 app.use((err, req, res, next) => {
     logger.error('Error:', err);
     logger.error('Stack:', err.stack);

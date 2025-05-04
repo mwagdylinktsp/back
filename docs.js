@@ -1,9 +1,9 @@
 const express = require('express');
-// const router = express.Router();
+const router = express.Router();
 
 // صفحة التوثيق الرئيسية
 router.get('/', (req, res) => {
-//     const apiDocs = {
+    const apiDocs = {
         openapi: "3.0.0",
         info: {
             title: "Norween API Documentation",

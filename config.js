@@ -2,6 +2,7 @@ const sql = require('mssql');
 const logger = require('./utils/logger');
 require('dotenv').config();
 
+// Database configuration
 const config = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -21,6 +22,10 @@ const config = {
 
 let pool = null;
 
+/**
+ * Creates or returns an existing connection pool to the database
+ * @returns {Promise<sql.ConnectionPool>}
+ */
 async function connectDB() {
     try {
         if (!pool) {
