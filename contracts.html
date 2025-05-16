@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عقود العملاء | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex gap-4">
+                <button onclick="openAddContractModal()" 
+                        class="text-white px-6 py-3 rounded-lg"
+                        style="background-color: #ff3c00; transition: background-color 0.2s;"
+                        onmouseover="this.style.backgroundColor='#cc3200';" 
+                        onmouseout="this.style.backgroundColor='#ff3c00';">
+                    إضافة عقد جديد
+                    <i class="fas fa-plus mr-2"></i>
+                </button>
+                <a href="dashboard.html" 
+                   class="text-white px-6 py-3 rounded-lg"
+                   style="background-color: #ff3c00; transition: background-color 0.2s;"
+                   onmouseover="this.style.backgroundColor='#cc3200';" 
+                   onmouseout="this.style.backgroundColor='#ff3c00';">
+                    الرئيسية
+                    <i class="fas fa-home mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">قائمة العقود</h1>
+                <div class="relative">
+                    <input type="text" 
+                           id="searchInput" 
+                           placeholder="بحث في العقود..." 
+                           class="w-64 pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff3c00] focus:border-transparent">
+                    <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="p-4 text-right font-semibold text-gray-600">رقم العقد</th>
+                            <th class="p-4 text-right font-semibold text-gray-600">اسم العميل</th>
+                            <th class="p-4 text-right font-semibold text-gray-600">تاريخ البداية</th>
+                            <th class="p-4 text-right font-semibold text-gray-600">تاريخ النهاية</th>
+                            <th class="p-4 text-right font-semibold text-gray-600">قيمة العقد</th>
+                            <th class="p-4 text-right font-semibold text-gray-600">حالة العقد</th>
+                            <th class="p-4 text-center font-semibold text-gray-600">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contractsTableBody">
+                        <!-- سيتم ملء البيانات هنا من خلال JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال إضافة/تعديل عقد -->
+    <div id="addContractModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold text-gray-800" id="modalTitle">إضافة عقد جديد</h2>
+                <button onclick="closeAddContractModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="addContractForm" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">رقم العقد</label>
+                        <input type="text" id="contractNumber" required
+                               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">العميل</label>
+                        <select id="customerId" required
+                                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">تاريخ بداية العقد</label>
+                        <input type="date" id="startDate" required
+                               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">تاريخ نهاية العقد</label>
+                        <input type="date" id="endDate" required
+                               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">قيمة العقد</label>
+                        <input type="number" id="contractValue" required
+                               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">نوع العقد</label>
+                        <select id="contractType" required
+                                class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                            <option value="">اختر نوع العقد</option>
+                            <option value="maintenance">عقد صيانة</option>
+                            <option value="service">عقد خدمات</option>
+                            <option value="support">عقد دعم فني</option>
+                            <option value="emails">ايملات شركات</option>
+                            <option value="website">موقع اليكتروني</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-gray-700 mb-2">تفاصيل العقد</label>
+                        <textarea id="contractDetails" rows="4"
+                                  class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]"></textarea>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-gray-700 mb-2">ملف العقد (PDF)</label>
+                        <input type="file" id="contractFile" accept=".pdf"
+                               class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" onclick="closeAddContractModal()"
+                            class="px-6 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition duration-200">
+                        إلغاء
+                    </button>
+                    <button type="submit"
+                            class="bg-[#ff3c00] text-white px-6 py-2.5 rounded-lg hover:bg-[#cc3200] transition duration-200">
+                        حفظ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- مودال عرض تفاصيل العقد -->
+    <div id="viewContractModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 p-6">
+            <div class="flex justify-end">
+                <button onclick="closeViewContractModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="viewContractContent" class="mt-4">
+                <!-- سيتم ملء المحتوى هنا من خلال JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="contracts.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg"
+                style="background-color: #ff3c00; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#cc3200';" 
+                onmouseout="this.style.backgroundColor='#ff3c00';">
+                العودة للرئيسية
+                <i class="fas fa-home mr-2"></i>
+            </a>
+        </div>
+
+        <!-- نموذج الملف الشخصي -->
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
+            <h2 class="text-2xl font-bold mb-6">الملف الشخصي</h2>
+            <form id="profileForm" class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 mb-2">اسم المستخدم</label>
+                    <input type="text" id="userName" autocomplete="username" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]" readonly>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="userEmail" autocomplete="email" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]" readonly>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">كلمة المرور الحالية</label>
+                    <input type="password" id="currentPassword" autocomplete="current-password" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">كلمة المرور الجديدة</label>
+                    <input type="password" id="newPassword" autocomplete="new-password" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
+                    <input type="password" id="confirmPassword" autocomplete="new-password" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]" required>
+                </div>
+                <button type="submit" class="w-full text-white px-6 py-2 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';"
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    تحديث كلمة المرور
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1_MuUCT4U3YaI0-yRGaKO0sVnXFGfxCU",
+            authDomain: "norween-invoices.firebaseapp.com",
+            projectId: "norween-invoices",
+            storageBucket: "norween-invoices.appspot.com",
+            messagingSenderId: "1001073857267",
+            appId: "1:1001073857267:web:a0d632f13f6316baac1d86"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        // تحسين التحقق من تسجيل الدخول وتحميل البيانات
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                try {
+                    // جلب بيانات المستخدم من Firestore
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        document.getElementById('userName').value = userData.name || '';
+                        document.getElementById('userEmail').value = user.email || '';
+                    } else {
+                        console.error('لم يتم العثور على بيانات المستخدم في Firestore');
+                    }
+                } catch (error) {
+                    console.error('خطأ في تحميل بيانات المستخدم:', error);
+                    alert('حدث خطأ في تحميل بيانات المستخدم');
+                }
+            });
+        });
+
+        // تحسين معالجة تحديث كلمة المرور
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'كلمة المرور الجديدة غير متطابقة',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً',
+                    confirmButtonColor: '#ff3c00'
+                });
+                return;
+            }
+
+            try {
+                const user = auth.currentUser;
+                const credential = EmailAuthProvider.credential(user.email, currentPassword);
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPassword);
+                
+                Swal.fire({
+                    title: 'تم بنجاح',
+                    text: 'تم تحديث كلمة المرور بنجاح',
+                    icon: 'success',
+                    confirmButtonText: 'حسناً',
+                    confirmButtonColor: '#ff3c00'
+                });
+                
+                // مسح حقول النموذج
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } catch (error) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'كلمة المرور الحالية غير صحيحة',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً',
+                    confirmButtonColor: '#ff3c00'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

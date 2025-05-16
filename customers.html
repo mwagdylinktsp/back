@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex gap-4">
+                <button onclick="openAddCustomerModal()" class="text-white px-6 py-3 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    إضافة عميل جديد
+                    <i class="fas fa-plus mr-2"></i>
+                </button>
+                <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    العودة للرئيسية
+                    <i class="fas fa-home mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- جدول العملاء -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">قائمة العملاء</h2>
+                <input type="text" id="searchInput" placeholder="بحث في العملاء..." 
+                    class="border rounded-lg px-4 py-2 w-64 text-right">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="p-4 text-right font-semibold">اسم العميل</th>
+                            <th class="p-4 text-right font-semibold">رقم الهاتف</th>
+                            <th class="p-4 text-right font-semibold">العنوان</th>
+                            <th class="p-4 text-right font-semibold">البريد الإلكتروني</th>
+                            <th class="p-4 text-center font-semibold">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة/تعديل العميل -->
+    <div id="customerModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h3 class="text-xl font-bold mb-4" id="modalTitle">إضافة عميل جديد</h3>
+            <form id="customerForm">
+                <input type="hidden" id="customerId">
+                <div class="mb-4">
+                    <label class="block mb-2">اسم العميل</label>
+                    <input type="text" id="customerName" required class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">رقم الهاتف</label>
+                    <input type="tel" id="customerPhone" required class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">العنوان</label>
+                    <input type="text" id="customerAddress" required class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="customerEmail" class="w-full border rounded p-2">
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="submit" class="text-white px-4 py-2 rounded"
+                        style="background-color: #ff3c00;">حفظ</button>
+                    <button type="button" onclick="closeCustomerModal()" 
+                        class="bg-gray-500 text-white px-4 py-2 rounded">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="customers.js"></script>
+</body>
+</html>

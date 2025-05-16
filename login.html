@@ -12,6 +12,7 @@
 </head>
 
 <body class="bg-black min-h-screen flex items-center justify-center">
+  <!-- إضافة زر العودة في الجزء العلوي -->
   <div class="bg-white rounded-lg shadow-md p-8 w-full max-w-md text-center">
     <img src="data/norWeenlogoBlack.png" alt="Logo" class="w-64 mx-auto mb-4">
     <h1 class="text-2xl font-bold mb-6">Login</h1>
@@ -55,7 +56,7 @@
         .then((userCredential) => userCredential.user.getIdToken())
         .then((idToken) => {
           localStorage.setItem("idToken", idToken);
-          window.location.href = "index.html";
+          window.location.href = "/dashboard.html"; // تغيير التوجيه إلى صفحة لوحة التحكم
         })
         .catch((error) => {
           console.error("Login error:", error);

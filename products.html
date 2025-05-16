@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex gap-4">
+                <button onclick="openAddProductModal()" class="text-white px-6 py-3 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    إضافة منتج جديد
+                    <i class="fas fa-plus mr-2"></i>
+                </button>
+                <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    العودة للرئيسية
+                    <i class="fas fa-home mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- جدول المنتجات -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">قائمة المنتجات</h2>
+                <input type="text" id="searchInput" placeholder="بحث في المنتجات..." 
+                    class="border rounded-lg px-4 py-2 w-64">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-3 text-right">كود المنتج</th>
+                            <th class="p-3 text-right">اسم المنتج</th>
+                            <th class="p-3 text-right">السعر</th>
+                            <th class="p-3 text-right">الكمية المتاحة</th>
+                            <th class="p-3 text-right">الحالة</th>
+                            <th class="p-3 text-right">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة/تعديل المنتج -->
+    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h3 class="text-xl font-bold mb-4" id="modalTitle">إضافة منتج جديد</h3>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="mb-4">
+                    <label class="block mb-2">كود المنتج</label>
+                    <input type="text" id="productCode" required class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">اسم المنتج</label>
+                    <input type="text" id="productName" required class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">السعر</label>
+                    <input type="number" id="productPrice" required min="0" step="0.01" class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">الكمية المتاحة</label>
+                    <input type="number" id="productQuantity" required min="0" class="w-full border rounded p-2">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">الحالة</label>
+                    <select id="productStatus" class="w-full border rounded p-2">
+                        <option value="active">متاح</option>
+                        <option value="inactive">غير متاح</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="submit" class="text-white px-4 py-2 rounded"
+                        style="background-color: #ff3c00;">حفظ</button>
+                    <button type="button" onclick="closeProductModal()" 
+                        class="bg-gray-500 text-white px-4 py-2 rounded">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="products.js"></script>
+</body>
+</html>

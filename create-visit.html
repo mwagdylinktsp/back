@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقديم زيارة جديدة | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex gap-4">
+                <a href="visits-history.html" class="text-white px-6 py-3 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    سجل الزيارات
+                    <i class="fas fa-history mr-2"></i>
+                </a>
+                <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    العودة للرئيسية
+                    <i class="fas fa-arrow-right mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- نموذج تقديم الزيارة -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-6">تقديم زيارة جديدة</h2>
+            <form id="visitForm" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">اسم العميل</label>
+                        <input type="text" id="customerName" required
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">رقم الهاتف</label>
+                        <input type="tel" id="phoneNumber" required
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">العنوان</label>
+                        <input type="text" id="address" required
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">تاريخ الزيارة</label>
+                        <input type="datetime-local" id="visitDate" required
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 mb-2">سبب الزيارة</label>
+                        <textarea id="visitReason" rows="4" required
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-[#ff3c00] text-white px-6 py-3 rounded-lg hover:bg-[#cc3200]">
+                        تقديم الزيارة
+                        <i class="fas fa-paper-plane mr-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // التحقق من تسجيل الدخول
+        const handleLogin = () => {
+            const token = localStorage.getItem("idToken");
+            if (!token) {
+                window.location.href = "login.html";
+            }
+        }
+        handleLogin();
+
+        // إعداد Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1_MuUCT4U3YaI0-yRGaKO0sVnXFGfxCU",
+            authDomain: "norween-invoices.firebaseapp.com",
+            projectId: "norween-invoices",
+            storageBucket: "norween-invoices.appspot.com",
+            messagingSenderId: "1001073857267",
+            appId: "1:1001073857267:web:a0d632f13f6316baac1d86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // تقديم النموذج
+        document.getElementById('visitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const visitData = {
+                    customerName: document.getElementById('customerName').value,
+                    phoneNumber: document.getElementById('phoneNumber').value,
+                    address: document.getElementById('address').value,
+                    visitDate: document.getElementById('visitDate').value,
+                    visitReason: document.getElementById('visitReason').value,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                };
+
+                await addDoc(collection(db, 'visits'), visitData);
+                alert('تم تقديم الزيارة بنجاح!');
+                document.getElementById('visitForm').reset();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تقديم الزيارة');
+            }
+        });
+    </script>
+</body>
+</html>

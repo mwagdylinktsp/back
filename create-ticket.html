@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء تذكرة | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وزر العودة -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg"
+                style="background-color: #ff3c00; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#cc3200';" 
+                onmouseout="this.style.backgroundColor='#ff3c00';">
+                العودة للرئيسية
+                <i class="fas fa-arrow-right mr-2"></i>
+            </a>
+        </div>
+
+        <!-- نموذج إنشاء التذكرة -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-6">إنشاء تذكرة جديدة</h2>
+            <form id="ticketForm" class="space-y-6">
+                <div>
+                    <label class="block text-gray-700 mb-2">عنوان التذكرة</label>
+                    <input type="text" id="ticketTitle" required
+                        class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">نوع التذكرة</label>
+                    <select id="ticketType" required
+                        class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="bug">مشكلة تقنية</option>
+                        <option value="feature">طلب ميزة جديدة</option>
+                        <option value="support">طلب دعم</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">الأولوية</label>
+                    <select id="ticketPriority" required
+                        class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="low">منخفضة</option>
+                        <option value="medium">متوسطة</option>
+                        <option value="high">عالية</option>
+                        <option value="urgent">عاجلة</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">وصف المشكلة</label>
+                    <textarea id="ticketDescription" rows="5" required
+                        class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 mb-2">المرفقات (اختياري)</label>
+                    <input type="file" id="ticketAttachments" multiple
+                        class="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+
+                <button type="submit" class="w-full bg-[#ff3c00] text-white py-3 rounded-lg hover:bg-[#cc3200] transition-all">
+                    إنشاء التذكرة
+                    <i class="fas fa-paper-plane mr-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // التحقق من تسجيل الدخول
+        const handleLogin = () => {
+            const token = localStorage.getItem("idToken");
+            if (!token) {
+                window.location.href = "login.html";
+            }
+        }
+        handleLogin();
+
+        // إعداد Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1_MuUCT4U3YaI0-yRGaKO0sVnXFGfxCU",
+            authDomain: "norween-invoices.firebaseapp.com",
+            projectId: "norween-invoices",
+            storageBucket: "norween-invoices.appspot.com",
+            messagingSenderId: "1001073857267",
+            appId: "1:1001073857267:web:a0d632f13f6316baac1d86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // معالجة تقديم النموذج
+        document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            try {
+                const ticketData = {
+                    title: document.getElementById('ticketTitle').value,
+                    type: document.getElementById('ticketType').value,
+                    priority: document.getElementById('ticketPriority').value,
+                    description: document.getElementById('ticketDescription').value,
+                    status: 'new',
+                    createdAt: serverTimestamp(),
+                    userId: localStorage.getItem('idToken')
+                };
+
+                await addDoc(collection(db, 'tickets'), ticketData);
+                alert('تم إنشاء التذكرة بنجاح!');
+                window.location.href = 'tickets-history.html';
+            } catch (error) {
+                console.error('خطأ في إنشاء التذكرة:', error);
+                alert('حدث خطأ أثناء إنشاء التذكرة. يرجى المحاولة مرة أخرى.');
+            }
+        });
+    </script>
+</body>
+</html>

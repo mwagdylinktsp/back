@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة المستخدمين | norWeen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" href="data/norWeenicon.png" type="image/png">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+</head>
+<body class="bg-black min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <!-- الشعار وأزرار التنقل -->
+    <div class="flex justify-between items-center mb-8">
+      <div class="h-[100px] w-[250px] relative">
+        <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+      </div>
+      <div class="flex gap-4">
+        <button 
+          id="addUserBtn"
+          onclick="openAddUserModal()"
+          class="hidden text-white px-6 py-3 rounded-lg bg-[#ff3c00] hover:bg-[#cc3200] transition-colors"
+        >
+          <i class="fas fa-user-plus ml-2"></i>إضافة مستخدم جديد
+        </button>
+        <a 
+          href="dashboard.html"
+          class="text-white px-6 py-3 rounded-lg bg-[#ff3c00] hover:bg-[#cc3200] transition-colors"
+        >
+          <i class="fas fa-home ml-2"></i>الرئيسية
+        </a>
+      </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">قائمة المستخدمين</h1>
+        <div class="relative">
+          <input 
+            type="text"
+            id="searchInput"
+            placeholder="بحث في المستخدمين..."
+            class="w-64 pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff3c00] focus:border-transparent"
+          >
+          <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 border-b">
+              <th class="p-4 text-right font-semibold text-gray-600">اسم المستخدم</th>
+              <th class="p-4 text-right font-semibold text-gray-600">البريد الإلكتروني</th>
+              <th class="p-4 text-right font-semibold text-gray-600">الصلاحيات</th>
+              <th class="p-4 text-right font-semibold text-gray-600">الشركة</th>
+              <th class="p-4 text-right font-semibold text-gray-600">تاريخ الإنشاء</th>
+              <th class="p-4 text-center font-semibold text-gray-600">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <!-- يُعرض هنا إما المؤشر أو بيانات المستخدمين -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال إضافة/تعديل مستخدم -->
+  <div 
+    id="addUserModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+  >
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div class="flex justify-between items-center p-6 border-b">
+        <h2 id="modalTitle" class="text-xl font-bold text-gray-800">إضافة مستخدم جديد</h2>
+        <button onclick="closeAddUserModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form id="addUserForm" class="p-6">
+        <div class="space-y-4">
+          <div>
+            <label for="userName" class="block text-gray-700 mb-2">اسم المستخدم</label>
+            <input 
+              type="text" id="userName" required
+              class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]"
+            >
+          </div>
+          <div>
+            <label for="userEmail" class="block text-gray-700 mb-2">البريد الإلكتروني</label>
+            <input 
+              type="email" id="userEmail" required
+              class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]"
+            >
+          </div>
+          <div>
+            <label for="userPassword" class="block text-gray-700 mb-2">كلمة المرور</label>
+            <input 
+              type="password" id="userPassword" required
+              class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]"
+            >
+          </div>
+          <div>
+            <label for="userRole" class="block text-gray-700 mb-2">الصلاحيات</label>
+            <select 
+              id="userRole" required
+              class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]"
+            >
+              <option value="admin">مدير</option>
+              <option value="manager">مدير فرعي</option>
+              <option value="user">مستخدم</option>
+            </select>
+          </div>
+          <div>
+            <label for="userCompany" class="block text-gray-700 mb-2">الشركة</label>
+            <select id="userCompany" required
+                    class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+              <!-- تتعبّى ديناميكياً في JS -->
+            </select>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-4 mt-6">
+          <button 
+            type="button" onclick="closeAddUserModal()"
+            class="px-6 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition duration-200"
+          >
+            إلغاء
+          </button>
+          <button 
+            type="submit"
+            id="submitBtn"
+            class="text-white px-6 py-2.5 rounded-lg bg-[#ff3c00] hover:bg-[#cc3200] transition duration-200"
+          >
+            حفظ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="users.js"></script>
+</body>
+</html>

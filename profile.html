@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الصفحة الشخصية | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="h-[100px] w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex gap-4">
+                <a href="dashboard.html" 
+                   class="text-white px-6 py-3 rounded-lg"
+                   style="background-color: #ff3c00; transition: background-color 0.2s;"
+                   onmouseover="this.style.backgroundColor='#cc3200';" 
+                   onmouseout="this.style.backgroundColor='#ff3c00';">
+                    الرئيسية
+                    <i class="fas fa-home mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <div class="max-w-3xl mx-auto">
+                <h1 class="text-2xl font-bold mb-8 text-center">الملف الشخصي</h1>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- معلومات المستخدم -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h2 class="text-xl font-bold mb-6 text-gray-800">المعلومات الشخصية</h2>
+                        <div class="space-y-4" id="profileInfo">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">الاسم:</span>
+                                <span id="displayName" class="font-medium">...</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">البريد الإلكتروني:</span>
+                                <span id="displayEmail" class="font-medium">...</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">الصلاحية:</span>
+                                <span id="displayRole" class="font-medium">...</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">الشركة:</span>
+                                <span id="displayCompany" class="font-medium">...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- تغيير كلمة المرور -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h2 class="text-xl font-bold mb-6 text-gray-800">تغيير كلمة المرور</h2>
+                        <form id="passwordForm" class="space-y-4">
+                            <div>
+                                <label class="block text-gray-600 mb-2">كلمة المرور الجديدة</label>
+                                <input type="password" id="newPassword" required
+                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 mb-2">تأكيد كلمة المرور</label>
+                                <input type="password" id="confirmPassword" required
+                                       class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff3c00]">
+                            </div>
+                            <button type="submit"
+                                    class="w-full text-white px-4 py-2 rounded-lg transition duration-200"
+                                    style="background-color: #ff3c00;"
+                                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                                تغيير كلمة المرور
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- زر تسجيل الخروج -->
+                <div class="mt-8 text-center">
+                    <button id="signOutBtn" 
+                            class="text-white px-6 py-3 rounded-lg inline-flex items-center gap-2"
+                            style="background-color: #ff3c00; transition: background-color 0.2s;"
+                            onmouseover="this.style.backgroundColor='#cc3200';" 
+                            onmouseout="this.style.backgroundColor='#ff3c00';">
+                        <i class="fas fa-sign-out-alt"></i>
+                        تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="profile.js"></script>
+</body>
+</html>

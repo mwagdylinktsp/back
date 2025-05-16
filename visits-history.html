@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الزيارات | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="h-[80px] md:h-[100px] w-[200px] md:w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="create-visit.html" class="text-white px-6 py-3 rounded-lg text-center w-full sm:w-auto"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    زيارة جديدة
+                    <i class="fas fa-plus mr-2"></i>
+                </a>
+                <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg text-center w-full sm:w-auto"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    العودة للرئيسية
+                    <i class="fas fa-arrow-right mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- فلاتر البحث -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <input type="text" id="searchInput" placeholder="بحث..."
+                        class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                </div>
+                <div>
+                    <select id="statusFilter" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                        <option value="">الحالة</option>
+                        <option value="pending">قيد الانتظار</option>
+                        <option value="approved">تمت الموافقة</option>
+                        <option value="completed">مكتملة</option>
+                        <option value="cancelled">ملغية</option>
+                    </select>
+                </div>
+                <div>
+                    <input type="date" id="dateFilter" class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة الزيارات -->
+        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-4 text-right">رقم الزيارة</th>
+                            <th class="p-4 text-right">اسم العميل</th>
+                            <th class="p-4 text-right">تاريخ الزيارة</th>
+                            <th class="p-4 text-right">الحالة</th>
+                            <th class="p-4 text-right">تاريخ التقديم</th>
+                            <th class="p-4 text-right">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitsList">
+                        <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- نموذج عرض تفاصيل الزيارة -->
+        <div id="viewVisitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">تفاصيل الزيارة</h3>
+                    <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="visitDetails" class="space-y-4">
+                    <!-- سيتم ملء التفاصيل هنا -->
+                </div>
+                <div class="mt-6 border-t pt-4">
+                    <div class="flex justify-end gap-3">
+                        <button onclick="updateVisitStatus('approved')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                            موافقة
+                        </button>
+                        <button onclick="updateVisitStatus('completed')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            اكتمال
+                        </button>
+                        <button onclick="updateVisitStatus('cancelled')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // التحقق من تسجيل الدخول
+        const handleLogin = () => {
+            const token = localStorage.getItem("idToken");
+            if (!token) {
+                window.location.href = "login.html";
+            }
+        }
+        handleLogin();
+
+        // إعداد Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, getDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1_MuUCT4U3YaI0-yRGaKO0sVnXFGfxCU",
+            authDomain: "norween-invoices.firebaseapp.com",
+            projectId: "norween-invoices",
+            storageBucket: "norween-invoices.appspot.com",
+            messagingSenderId: "1001073857267",
+            appId: "1:1001073857267:web:a0d632f13f6316baac1d86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جلب الزيارات
+        const visitsRef = collection(db, 'visits');
+        const q = query(visitsRef, orderBy('createdAt', 'desc'));
+
+        onSnapshot(q, (querySnapshot) => {
+            const visitsList = document.getElementById('visitsList');
+            visitsList.innerHTML = '';
+
+            querySnapshot.forEach((doc) => {
+                const visit = doc.data();
+                const date = visit.createdAt ? new Date(visit.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : '';
+                const visitDate = new Date(visit.visitDate).toLocaleDateString('ar-EG');
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 border-b';
+                row.innerHTML = `
+                    <td class="p-4 text-right">#${doc.id.slice(-6)}</td>
+                    <td class="p-4 text-right">${visit.customerName}</td>
+                    <td class="p-4 text-right">${visitDate}</td>
+                    <td class="p-4 text-right">${getVisitStatusBadge(visit.status)}</td>
+                    <td class="p-4 text-right">${date}</td>
+                    <td class="p-4 text-right">
+                        <div class="flex gap-2 justify-end">
+                            <button onclick="viewVisit('${doc.id}')" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteVisit('${doc.id}')" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                visitsList.appendChild(row);
+            });
+        });
+
+        // وظائف مساعدة
+        function getVisitStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="px-2 py-1 rounded-full text-xs bg-yellow-200 text-yellow-800">قيد الانتظار</span>',
+                'approved': '<span class="px-2 py-1 rounded-full text-xs bg-green-200 text-green-800">تمت الموافقة</span>',
+                'completed': '<span class="px-2 py-1 rounded-full text-xs bg-blue-200 text-blue-800">مكتملة</span>',
+                'cancelled': '<span class="px-2 py-1 rounded-full text-xs bg-red-200 text-red-800">ملغية</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // عرض تفاصيل الزيارة
+        let currentVisitId = null;
+        
+        window.viewVisit = async function(visitId) {
+            currentVisitId = visitId;
+            const modal = document.getElementById('viewVisitModal');
+            const detailsDiv = document.getElementById('visitDetails');
+            
+            try {
+                const docRef = doc(db, 'visits', visitId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const visit = docSnap.data();
+                    const date = visit.createdAt ? new Date(visit.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : '';
+                    const visitDate = new Date(visit.visitDate).toLocaleDateString('ar-EG');
+                    
+                    detailsDiv.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">رقم الزيارة</p>
+                                <p class="text-gray-900 text-lg">#${visitId.slice(-6)}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">تاريخ التقديم</p>
+                                <p class="text-gray-900 text-lg">${date}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">اسم العميل</p>
+                                <p class="text-gray-900 text-lg">${visit.customerName}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">رقم الهاتف</p>
+                                <p class="text-gray-900 text-lg">${visit.phoneNumber}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">العنوان</p>
+                                <p class="text-gray-900 text-lg">${visit.address}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">تاريخ الزيارة</p>
+                                <p class="text-gray-900 text-lg">${visitDate}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm col-span-2">
+                                <p class="font-bold text-gray-700 text-sm mb-3">سبب الزيارة</p>
+                                <p class="text-gray-900 text-lg leading-relaxed">${visit.visitReason}</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                                <p class="font-bold text-gray-700 text-sm mb-3">الحالة</p>
+                                <div class="text-lg">${getVisitStatusBadge(visit.status)}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    modal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء جلب تفاصيل الزيارة');
+            }
+        };
+
+        // تحديث حالة الزيارة
+        window.updateVisitStatus = async function(status) {
+            if (!currentVisitId) return;
+            
+            try {
+                const docRef = doc(db, 'visits', currentVisitId);
+                await updateDoc(docRef, {
+                    status: status
+                });
+                closeViewModal();
+                alert('تم تحديث حالة الزيارة بنجاح');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء تحديث حالة الزيارة');
+            }
+        };
+
+        // إغلاق النافذة المنبثقة
+        window.closeViewModal = function() {
+            document.getElementById('viewVisitModal').classList.add('hidden');
+            currentVisitId = null;
+        };
+
+        // تصفية الزيارات
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('dateFilter').addEventListener('input', applyFilters);
+
+        function applyFilters() {
+            const rows = document.querySelectorAll('#visitsList tr');
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            rows.forEach(row => {
+                let show = true;
+                const cells = row.getElementsByTagName('td');
+                
+                if (statusFilter) {
+                    const statusText = cells[3].textContent.trim();
+                    if (!statusText.includes(getVisitStatusText(statusFilter))) {
+                        show = false;
+                    }
+                }
+                
+                if (dateFilter) {
+                    const visitDate = cells[2].textContent.trim();
+                    if (visitDate !== dateFilter) {
+                        show = false;
+                    }
+                }
+                
+                if (searchText) {
+                    let found = false;
+                    Array.from(cells).forEach(cell => {
+                        if (cell.textContent.toLowerCase().includes(searchText)) {
+                            found = true;
+                        }
+                    });
+                    if (!found) {
+                        show = false;
+                    }
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function getVisitStatusText(status) {
+            const statusTexts = {
+                'pending': 'قيد الانتظار',
+                'approved': 'تمت الموافقة',
+                'completed': 'مكتملة',
+                'cancelled': 'ملغية'
+            };
+            return statusTexts[status] || status;
+        }
+
+        // إضافة دالة حذف الزيارة
+        window.deleteVisit = async function(visitId) {
+            if (confirm('هل أنت متأكد من حذف هذه الزيارة؟')) {
+                try {
+                    const docRef = doc(db, 'visits', visitId);
+                    await deleteDoc(docRef);
+                    alert('تم حذف الزيارة بنجاح');
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء حذف الزيارة');
+                }
+            }
+        };
+    </script>
+</body>
+</html>

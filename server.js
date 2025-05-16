@@ -9,9 +9,15 @@ const __dirname = dirname(__filename);
 const app = express();
 const port = 3002; // تغيير المنفذ إلى 3001
 
+
 // Middleware
 app.use(express.static(__dirname));
 app.use(express.json());
+
+// Serve the main page
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, '/dashboard.html'));
+});
 
 // API Routes
 app.get('/api/company', (req, res) => {
@@ -90,10 +96,6 @@ app.delete('/api/invoices/:invoiceNumber', (req, res) => {
     res.json({ success: true });
 });
 
-// Serve the main page
-app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, 'index.html'));
-});
 
 // إضافة معالجة الأخطاء
 process.on('uncaughtException', (err) => {

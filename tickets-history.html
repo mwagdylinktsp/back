@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل التذاكر | norWeen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data/norWeenicon.png" type="image/png">
+</head>
+<body class="bg-black min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- الشعار وأزرار التنقل -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div class="h-[80px] md:h-[100px] w-[200px] md:w-[250px] relative">
+                <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="create-ticket.html" class="text-white px-6 py-3 rounded-lg text-center w-full sm:w-auto"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    إنشاء تذكرة جديدة
+                    <i class="fas fa-plus mr-2"></i>
+                </a>
+                <a href="dashboard.html" class="text-white px-6 py-3 rounded-lg text-center w-full sm:w-auto"
+                    style="background-color: #ff3c00; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#cc3200';" 
+                    onmouseout="this.style.backgroundColor='#ff3c00';">
+                    العودة للرئيسية
+                    <i class="fas fa-arrow-right mr-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- فلاتر البحث -->
+        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">حالة التذكرة</label>
+                    <select id="statusFilter" class="w-full border rounded-lg p-2">
+                        <option value="">الكل</option>
+                        <option value="new">جديدة</option>
+                        <option value="in-progress">قيد التنفيذ</option>
+                        <option value="resolved">تم الحل</option>
+                        <option value="closed">مغلقة</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">نوع التذكرة</label>
+                    <select id="typeFilter" class="w-full border rounded-lg p-2">
+                        <option value="">الكل</option>
+                        <option value="bug">مشكلة تقنية</option>
+                        <option value="feature">طلب ميزة</option>
+                        <option value="support">طلب دعم</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">الأولوية</label>
+                    <select id="priorityFilter" class="w-full border rounded-lg p-2">
+                        <option value="">الكل</option>
+                        <option value="low">منخفضة</option>
+                        <option value="medium">متوسطة</option>
+                        <option value="high">عالية</option>
+                        <option value="urgent">عاجلة</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">البحث</label>
+                    <input type="text" id="searchInput" placeholder="ابحث في العنوان أو الوصف..."
+                        class="w-full border rounded-lg p-2">
+                </div>
+            </div>
+        </div>
+
+        <!-- قائمة التذاكر -->
+        <div class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="p-4 text-right">رقم التذكرة</th>
+                            <th class="p-4 text-right">العنوان</th>
+                            <th class="p-4 text-right">النوع</th>
+                            <th class="p-4 text-right">الأولوية</th>
+                            <th class="p-4 text-right">الحالة</th>
+                            <th class="p-4 text-right">تاريخ الإنشاء</th>
+                            <th class="p-4 text-right">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketsList">
+                        <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- نموذج عرض التذكرة -->
+        <div id="viewTicketModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-lg p-4 md:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg md:text-xl font-bold">تفاصيل التذكرة</h3>
+                    <button onclick="closeViewModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="ticketDetails" class="space-y-4">
+                    <!-- سيتم ملء التفاصيل هنا -->
+                </div>
+                <div class="mt-6 space-y-4">
+                    <h4 class="font-bold">الردود</h4>
+                    <div id="ticketReplies" class="space-y-3 max-h-[40vh] overflow-y-auto p-4 border rounded-lg">
+                        <!-- سيتم ملء الردود هنا -->
+                    </div>
+                    <div class="border-t pt-4">
+                        <textarea id="replyText" class="w-full border rounded p-2 mb-3" rows="3" placeholder="اكتب ردك هنا..."></textarea>
+                        <div class="flex justify-end gap-3">
+                            <button onclick="submitReply()" class="bg-[#ff3c00] text-white px-4 py-2 rounded hover:bg-[#cc3200] w-full sm:w-auto">
+                                إرسال الرد
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // التحقق من تسجيل الدخول
+        const handleLogin = () => {
+            const token = localStorage.getItem("idToken");
+            if (!token) {
+                window.location.href = "login.html";
+            }
+        }
+        handleLogin();
+
+        // إعداد Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+        import { getFirestore, collection, query, orderBy, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+        import { doc, getDoc, updateDoc, arrayUnion, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1_MuUCT4U3YaI0-yRGaKO0sVnXFGfxCU",
+            authDomain: "norween-invoices.firebaseapp.com",
+            projectId: "norween-invoices",
+            storageBucket: "norween-invoices.appspot.com",
+            messagingSenderId: "1001073857267",
+            appId: "1:1001073857267:web:a0d632f13f6316baac1d86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جلب وعرض التذاكر
+        const q = query(collection(db, 'tickets'), orderBy('createdAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+            const ticketsList = document.getElementById('ticketsList');
+            ticketsList.innerHTML = '';
+
+            snapshot.forEach((doc) => {
+                const ticket = doc.data();
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50';
+                
+                const date = ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleString('ar-EG', {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : '';
+                
+                row.innerHTML = `
+                    <td class="p-4">#${doc.id.slice(-6)}</td>
+                    <td class="p-4">${ticket.title}</td>
+                    <td class="p-4">${getTicketTypeText(ticket.type)}</td>
+                    <td class="p-4">${getTicketPriorityBadge(ticket.priority)}</td>
+                    <td class="p-4">${getTicketStatusBadge(ticket.status)}</td>
+                    <td class="p-4">${date}</td>
+                    <td class="p-4 text-right">
+                        <div class="flex gap-2 justify-end">
+                            <button onclick="viewTicket('${doc.id}')" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="deleteTicket('${doc.id}')" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                ticketsList.appendChild(row);
+            });
+        });
+
+        // وظائف مساعدة
+        function getTicketTypeText(type) {
+            const types = {
+                'bug': 'مشكلة تقنية',
+                'feature': 'طلب ميزة',
+                'support': 'طلب دعم',
+                'other': 'أخرى'
+            };
+            return types[type] || type;
+        }
+
+        function getTicketPriorityBadge(priority) {
+            const badges = {
+                'low': '<span class="px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-800">منخفضة</span>',
+                'medium': '<span class="px-2 py-1 rounded-full text-xs bg-blue-200 text-blue-800">متوسطة</span>',
+                'high': '<span class="px-2 py-1 rounded-full text-xs bg-orange-200 text-orange-800">عالية</span>',
+                'urgent': '<span class="px-2 py-1 rounded-full text-xs bg-red-200 text-red-800">عاجلة</span>'
+            };
+            return badges[priority] || priority;
+        }
+
+        function getTicketStatusBadge(status) {
+            const badges = {
+                'new': '<span class="px-2 py-1 rounded-full text-xs bg-green-200 text-green-800">جديدة</span>',
+                'in-progress': '<span class="px-2 py-1 rounded-full text-xs bg-blue-200 text-blue-800">قيد التنفيذ</span>',
+                'resolved': '<span class="px-2 py-1 rounded-full text-xs bg-purple-200 text-purple-800">تم الحل</span>',
+                'closed': '<span class="px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-800">مغلقة</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // تصفية التذاكر
+        const filters = ['status', 'type', 'priority'];
+        filters.forEach(filter => {
+            document.getElementById(`${filter}Filter`).addEventListener('change', applyFilters);
+        });
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+        function applyFilters() {
+            const rows = document.querySelectorAll('#ticketsList tr');
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            rows.forEach(row => {
+                let show = true;
+                const cells = row.getElementsByTagName('td');
+                
+                // فحص فلتر الحالة
+                if (statusFilter) {
+                    const statusText = cells[4].textContent.trim();
+                    if (!statusText.includes(getTicketStatusBadge(statusFilter).replace(/<[^>]*>/g, ''))) {
+                        show = false;
+                    }
+                }
+                
+                // فحص فلتر النوع
+                if (typeFilter) {
+                    const typeText = cells[2].textContent.trim();
+                    if (!typeText.includes(getTicketTypeText(typeFilter))) {
+                        show = false;
+                    }
+                }
+                
+                // فحص فلتر الأولوية
+                if (priorityFilter) {
+                    const priorityText = cells[3].textContent.trim();
+                    if (!priorityText.includes(getTicketPriorityBadge(priorityFilter).replace(/<[^>]*>/g, ''))) {
+                        show = false;
+                    }
+                }
+                
+                // فحص نص البحث
+                if (searchText) {
+                    let found = false;
+                    Array.from(cells).forEach(cell => {
+                        const cellText = cell.textContent.toLowerCase().trim();
+                        if (cellText.includes(searchText)) {
+                            found = true;
+                        }
+                    });
+                    if (!found) {
+                        show = false;
+                    }
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        // عرض تفاصيل التذكرة
+        // إضافة متغير عام لتخزين معرف التذكرة الحالية
+        let currentTicketId = null;
+        
+        // تحديث وظيفة عرض التذكرة
+        window.viewTicket = async function(ticketId) {
+            currentTicketId = ticketId; // تخزين معرف التذكرة الحالية
+            const modal = document.getElementById('viewTicketModal');
+            const detailsDiv = document.getElementById('ticketDetails');
+            const repliesDiv = document.getElementById('ticketReplies');
+            
+            try {
+                const docRef = doc(db, 'tickets', ticketId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const ticket = docSnap.data();
+                    const date = ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleDateString('ar-EG') : '';
+                    
+                    detailsDiv.innerHTML = `
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="font-bold">رقم التذكرة:</p>
+                                <p>#${ticketId.slice(-6)}</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">التاريخ:</p>
+                                <p>${date}</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">العنوان:</p>
+                                <input type="text" id="editTitle" value="${ticket.title}" class="w-full border rounded p-2">
+                            </div>
+                            <div>
+                                <p class="font-bold">الحالة:</p>
+                                <select id="editStatus" class="w-full border rounded p-2">
+                                    <option value="new" ${ticket.status === 'new' ? 'selected' : ''}>جديدة</option>
+                                    <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>قيد التنفيذ</option>
+                                    <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>تم الحل</option>
+                                    <option value="closed" ${ticket.status === 'closed' ? 'selected' : ''}>مغلقة</option>
+                                </select>
+                            </div>
+                            <div>
+                                <p class="font-bold">النوع:</p>
+                                <select id="editType" class="w-full border rounded p-2">
+                                    <option value="bug" ${ticket.type === 'bug' ? 'selected' : ''}>مشكلة تقنية</option>
+                                    <option value="feature" ${ticket.type === 'feature' ? 'selected' : ''}>طلب ميزة</option>
+                                    <option value="support" ${ticket.type === 'support' ? 'selected' : ''}>طلب دعم</option>
+                                    <option value="other" ${ticket.type === 'other' ? 'selected' : ''}>أخرى</option>
+                                </select>
+                            </div>
+                            <div>
+                                <p class="font-bold">الأولوية:</p>
+                                <select id="editPriority" class="w-full border rounded p-2">
+                                    <option value="low" ${ticket.priority === 'low' ? 'selected' : ''}>منخفضة</option>
+                                    <option value="medium" ${ticket.priority === 'medium' ? 'selected' : ''}>متوسطة</option>
+                                    <option value="high" ${ticket.priority === 'high' ? 'selected' : ''}>عالية</option>
+                                    <option value="urgent" ${ticket.priority === 'urgent' ? 'selected' : ''}>عاجلة</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2">
+                                <p class="font-bold">الوصف:</p>
+                                <textarea id="editDescription" class="w-full border rounded p-2" rows="4">${ticket.description}</textarea>
+                            </div>
+                            <div class="col-span-2 flex justify-end gap-3">
+                                <button onclick="updateTicket()" class="bg-[#ff3c00] text-white px-4 py-2 rounded hover:bg-[#cc3200]">
+                                    حفظ التغييرات
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // عرض الردود إذا وجدت
+                    if (ticket.replies) {
+                        repliesDiv.innerHTML = ticket.replies.map(reply => `
+                            <div class="bg-gray-50 p-3 rounded">
+                                <p class="text-sm text-gray-600">${new Date(reply.timestamp).toLocaleString('ar-EG', {
+                                    year: 'numeric',
+                                    month: 'numeric',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}</p>
+                                <p class="mt-1">${reply.text}</p>
+                            </div>
+                        `).join('');
+                    } else {
+                        repliesDiv.innerHTML = '<p class="text-gray-500">لا توجد ردود بعد</p>';
+                    }
+                    
+                    modal.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('خطأ في جلب تفاصيل التذكرة:', error);
+                alert('حدث خطأ أثناء جلب تفاصيل التذكرة');
+            }
+        };
+
+        // إغلاق النافذة المنبثقة
+        window.closeViewModal = function() {
+            currentTicketId = null; // إعادة تعيين معرف التذكرة عند الإغلاق
+            document.getElementById('viewTicketModal').classList.add('hidden');
+        };
+
+        // إرسال رد جديد
+        window.submitReply = async function() {
+            if (!currentTicketId) {
+                alert('حدث خطأ: لم يتم العثور على معرف التذكرة');
+                return;
+            }
+
+            const replyText = document.getElementById('replyText').value.trim();
+            if (!replyText) {
+                alert('الرجاء كتابة رد قبل الإرسال');
+                return;
+            }
+
+            try {
+                const docRef = doc(db, 'tickets', currentTicketId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const ticket = docSnap.data();
+                    const replies = ticket.replies || [];
+                    
+                    // Add new reply with current timestamp
+                    replies.push({
+                        text: replyText,
+                        timestamp: new Date().getTime(),
+                        userId: localStorage.getItem('idToken')
+                    });
+
+                    // Update the document with the new replies array
+                    await updateDoc(docRef, {
+                        replies: replies
+                    });
+
+                    document.getElementById('replyText').value = '';
+                    viewTicket(currentTicketId); // تحديث عرض التذكرة
+                    alert('تم إرسال الرد بنجاح');
+                }
+            } catch (error) {
+                console.error('خطأ في إرسال الرد:', error);
+                alert('حدث خطأ أثناء إرسال الرد');
+            }
+        };
+
+        // إضافة وظيفة تحديث التذكرة
+        window.updateTicket = async function() {
+            if (!currentTicketId) {
+                alert('حدث خطأ: لم يتم العثور على معرف التذكرة');
+                return;
+            }
+
+            try {
+                const docRef = doc(db, 'tickets', currentTicketId);
+                
+                const updatedData = {
+                    title: document.getElementById('editTitle').value,
+                    status: document.getElementById('editStatus').value,
+                    type: document.getElementById('editType').value,
+                    priority: document.getElementById('editPriority').value,
+                    description: document.getElementById('editDescription').value,
+                    lastUpdated: new Date().getTime()
+                };
+
+                await updateDoc(docRef, updatedData);
+                alert('تم تحديث التذكرة بنجاح');
+                viewTicket(currentTicketId); // تحديث عرض التذكرة
+            } catch (error) {
+                console.error('خطأ في تحديث التذكرة:', error);
+                alert('حدث خطأ أثناء تحديث التذكرة');
+            }
+        };
+
+        // تحديث تنسيق الجدول
+        const tableStyles = `
+        <style>
+            #ticketsList tr {
+                border-bottom: 1px solid #e5e7eb;
+            }
+            #ticketsList td {
+                padding: 1rem;
+                text-align: right;
+                vertical-align: middle;
+            }
+            #ticketsList tr:hover {
+                background-color: #f9fafb;
+            }
+            .table-container {
+                max-height: 500px;
+                overflow-y: auto;
+            }
+        </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', tableStyles);
+
+        // تحديث هيكل الجدول
+        document.querySelector('.overflow-x-auto').className = 'table-container';
+
+        // إضافة دالة حذف التذكرة
+        window.deleteTicket = async function(ticketId) {
+            if (confirm('هل أنت متأكد من حذف هذه التذكرة؟')) {
+                try {
+                    const docRef = doc(db, 'tickets', ticketId);
+                    await deleteDoc(docRef);
+                    alert('تم حذف التذكرة بنجاح');
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء حذف التذكرة');
+                }
+            }
+        };
+    </script>
+</body>
+</html>

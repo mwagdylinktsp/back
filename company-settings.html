@@ -1,0 +1,82 @@
+<!-- settings.html -->
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إعدادات الشركة | norWeen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="icon" href="data/norWeenicon.png" type="image/png">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-black min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <!-- الشعار وزر العودة -->
+    <div class="flex justify-between items-center mb-8">
+      <div class="h-[100px] w-[250px] relative">
+        <img src="data/norWeenlogo.png" alt="norWeen Logo" class="object-contain w-full h-full absolute">
+      </div>
+      <a href="dashboard.html"
+         class="text-white px-6 py-3 rounded-lg"
+         style="background-color: #ff3c00; transition: background-color 0.2s;"
+         onmouseover="this.style.backgroundColor='#cc3200';"
+         onmouseout="this.style.backgroundColor='#ff3c00';">
+        العودة للرئيسية <i class="fas fa-home mr-2"></i>
+      </a>
+    </div>
+
+    <!-- نموذج إعدادات الشركة -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h2 class="text-2xl font-bold mb-6">إعدادات الشركة</h2>
+      <!-- غيّرنا id إلى settingsForm ليتطابق مع السكربت -->
+      <form id="settingsForm" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 mb-2">اسم الشركة</label>
+            <input type="text" id="companyName"
+                   class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]"
+                   required>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-2">رقم الهاتف</label>
+            <input type="tel" id="companyPhone"
+                   class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]"
+                   required>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-2">البريد الإلكتروني</label>
+            <input type="email" id="companyEmail"
+                   class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]"
+                   required>
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-2">العنوان</label>
+            <input type="text" id="companyAddress"
+                   class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]"
+                   required>
+          </div>
+          <div class="col-span-2">
+            <label class="block text-gray-700 mb-2">شعار الشركة</label>
+            <input type="file" id="companyLogo" accept="image/*"
+                   class="w-full border rounded-lg p-2 focus:outline-none focus:border-[#ff3c00]">
+            <img id="logoPreview" class="hidden mt-4 max-w-xs rounded-lg shadow-lg">
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit"
+                  class="text-white px-6 py-3 rounded-lg"
+                  style="background-color: #ff3c00; transition: background-color 0.2s;"
+                  onmouseover="this.style.backgroundColor='#cc3200';"
+                  onmouseout="this.style.backgroundColor='#ff3c00';">
+            حفظ التغييرات <i class="fas fa-save mr-2"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ربط السكربت الخارجي -->
+  <script type="module" src="company-settings.js"></script>
+</body>
+</html>

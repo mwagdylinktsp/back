@@ -12,6 +12,7 @@
 
     <!-- PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-black">
@@ -65,10 +66,10 @@
 
             <!-- Totals -->
             <div class="text-left mb-8 border-t pt-4 space-y-2">
-                <p class="text-xl font-semibold">Total: <span id="invoiceTotal"></span> EGP</p>
+                <p class="text-xl font-semibold">الإجمالي: <span id="invoiceTotal"></span> جنيه</p>
                 <div id="paymentDetails" class="hidden">
-                    <p class="text-green-600">Paid Amount: <span id="paidAmount"></span> EGP</p>
-                    <p class="text-red-600 font-bold">Remaining Amount: <span id="remainingAmount"></span> EGP</p>
+                    <p class="text-green-600">المبلغ المدفوع: <span id="paidAmount"></span> جنيه</p>
+                    <p class="text-red-600 font-bold">المبلغ المتبقي: <span id="remainingAmount"></span> جنيه</p>
                 </div>
                 <p id="paymentStatus" class="mt-2 font-bold"></p>
             </div>
